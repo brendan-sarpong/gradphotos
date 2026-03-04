@@ -195,7 +195,18 @@ if (isMobile && mobileCarousel && carouselTrack && carouselTitle && carouselDesc
   mobileCarousel.setAttribute("aria-hidden", "false");
 
   const cards = carouselTrack.querySelectorAll(".carousel-card");
-  let lastActiveIndex = 0;
+  const START_INDEX = 1; // GRAD (0 = PEOPLE clone, 1 = GRAD, 2 = PLACES, 3 = STUDIO, 4 = PEOPLE, 5 = GRAD clone)
+  let lastActiveIndex = START_INDEX;
+  let scrollEndTimer = null;
+
+  function scrollToIndex(index) {
+    const card = cards[index];
+    if (!card) return;
+    const wasSmooth = carouselTrack.style.scrollBehavior;
+    carouselTrack.style.scrollBehavior = "auto";
+    carouselTrack.scrollLeft = card.offsetLeft;
+    carouselTrack.style.scrollBehavior = wasSmooth || "smooth";
+  }
 
   function setCaption(index) {
     const card = cards[index];
@@ -211,6 +222,39 @@ if (isMobile && mobileCarousel && carouselTrack && carouselTitle && carouselDesc
     }
   }
 
+  // Start at GRAD (index 1) after layout is ready
+  function initCarouselPosition() {
+    if (!cards[START_INDEX] || cards[START_INDEX].offsetWidth === 0) {
+      requestAnimationFrame(initCarouselPosition);
+      return;
+    }
+    scrollToIndex(START_INDEX);
+    setCaption(START_INDEX);
+  }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => requestAnimationFrame(initCarouselPosition));
+  } else {
+    requestAnimationFrame(initCarouselPosition);
+  }
+
+  // Infinite loop: when scroll ends on a clone, jump to the real card
+  function checkInfiniteJump() {
+    if (!cards[1] || !cards[4]) return;
+    const left = carouselTrack.scrollLeft;
+    const midFirst = cards[1].offsetLeft * 0.5;
+    const startLast = cards[4].offsetLeft + cards[4].offsetWidth * 0.5;
+    if (left < midFirst) {
+      scrollToIndex(4); // jump to real PEOPLE
+    } else if (left > startLast) {
+      scrollToIndex(1); // jump to real GRAD
+    }
+  }
+
+  carouselTrack.addEventListener("scroll", () => {
+    clearTimeout(scrollEndTimer);
+    scrollEndTimer = setTimeout(checkInfiniteJump, 120);
+  }, { passive: true });
+
   const observer = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
@@ -224,7 +268,6 @@ if (isMobile && mobileCarousel && carouselTrack && carouselTitle && carouselDesc
     { root: carouselTrack, threshold: 0.5 }
   );
   cards.forEach((card) => observer.observe(card));
-  setCaption(0);
 
   cards.forEach((card) => {
     card.addEventListener("click", () => enterCategory(card.dataset.category));

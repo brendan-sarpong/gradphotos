@@ -723,6 +723,8 @@ body {
     .thumb {
       position: static;
       box-sizing: border-box;
+      border-radius: 12px;
+      overflow: hidden;
     }
 
     #gallery {
