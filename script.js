@@ -230,6 +230,7 @@ if (isMobile && mobileCarousel && carouselTrack && carouselTitle && carouselDesc
     }
     scrollToIndex(START_INDEX);
     setCaption(START_INDEX);
+    updateCardTransforms();
   }
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", () => requestAnimationFrame(initCarouselPosition));
@@ -250,10 +251,33 @@ if (isMobile && mobileCarousel && carouselTrack && carouselTitle && carouselDesc
     }
   }
 
+  function updateCardTransforms() {
+    if (!cards.length) return;
+    const trackCenter = carouselTrack.scrollLeft + carouselTrack.clientWidth / 2;
+    const maxTilt = 14;
+    const cardWidth = cards[0].offsetWidth;
+    if (!cardWidth) return;
+    cards.forEach((card) => {
+      const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+      const offset = (trackCenter - cardCenter) / cardWidth;
+      const tilt = Math.max(-1, Math.min(1, offset)) * maxTilt;
+      const scale = 1 - Math.abs(tilt) * 0.012;
+      card.style.transform = `perspective(1600px) rotateY(${tilt}deg) scale(${scale})`;
+    });
+  }
+
+  let carouselRAF = null;
   carouselTrack.addEventListener("scroll", () => {
     clearTimeout(scrollEndTimer);
     scrollEndTimer = setTimeout(checkInfiniteJump, 120);
+    if (carouselRAF) cancelAnimationFrame(carouselRAF);
+    carouselRAF = requestAnimationFrame(() => {
+      updateCardTransforms();
+      carouselRAF = null;
+    });
   }, { passive: true });
+
+  updateCardTransforms();
 
   const observer = new IntersectionObserver(
     (entries) => {

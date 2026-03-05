@@ -111,11 +111,16 @@ body {
   }
 
   .projects-contacts img {
-    height: 30px;
+    height: 32px;
     width: auto;
     display: block;
     opacity: 0.8;
     transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+  .projects-contacts .projects-contacts-linkedin img {
+    height: 32px;
+    width: 32px;
+    object-fit: contain;
   }
 
   .projects-contacts a:hover img {
@@ -613,11 +618,12 @@ body {
       padding: 88px 0 24px;
       box-sizing: border-box;
       -webkit-overflow-scrolling: touch;
+      perspective: 1600px;
+      perspective-origin: center center;
     }
     .mobile-carousel-wrap[aria-hidden="false"] {
       display: flex;
     }
-
     .carousel-track {
       display: flex;
       overflow-x: auto;
@@ -626,7 +632,7 @@ body {
       scroll-behavior: smooth;
       gap: 0;
       flex: 0 0 auto;
-      padding: 0 12px;
+      padding: 24px 12px;
       -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
     }
@@ -644,17 +650,23 @@ body {
       -webkit-tap-highlight-color: transparent;
       padding: 0 6px;
       box-sizing: border-box;
+      transform-style: preserve-3d;
+      transform-origin: center center;
+      transition: transform 0.28s cubic-bezier(0.33, 1, 0.68, 1);
+      will-change: transform;
+      backface-visibility: hidden;
     }
     .carousel-card-img-wrap {
       width: 100%;
       height: 64vh;
       max-height: 420px;
-      border-radius: 12px;
+      border-radius: 16px;
       overflow: hidden;
       background: #4E6151;
       display: flex;
       align-items: center;
       justify-content: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
     }
     .carousel-card-img-wrap img {
       width: 100%;
